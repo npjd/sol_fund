@@ -77,4 +77,20 @@ contract CrowdFund {
         pledgedAmount[_id][msg.sender] += _amount;
         token.transferFrom(msg.sender, address(this), _amount);
     }
+
+    function withdraw(uint256 _id, uint256 _amount) public {
+        Campaign storage campaign = campaigns[_id];
+        require(
+            campaign.endAt > block.timestamp,
+            "Campaign cannot be withdrawn after it has ended"
+        );
+        require(
+            _amount <= pledgedAmount[_id][msg.sender],
+            "Not enough tokens to withdraw"
+        );
+
+        campaign.pledged -= _amount;
+        pledgedAmount[_id][msg.sender] -= _amount;
+        token.transfer(address(this), _amount);
+    }
 }
