@@ -59,9 +59,22 @@ contract CrowdFund {
             "Campaign cannot be canceled after it has started"
         );
 
-        delete(campaigns[_id]);
+        delete (campaigns[_id]);
     }
 
+    function pledge(uint256 _id, uint256 _amount) public {
+        Campaign storage campaign = campaigns[_id];
+        require(
+            campaign.startAt <= block.timestamp,
+            "Campaign cannot be pledged after it has started"
+        );
+        require(
+            campaign.endAt > block.timestamp,
+            "Campaign cannot be pledged after it has ended"
+        );
 
-    
+        campaign.pledged += _amount;
+        pledgedAmount[_id][msg.sender] += _amount;
+        token.transferFrom(msg.sender, address(this), _amount);
+    }
 }
