@@ -47,4 +47,21 @@ contract CrowdFund {
             claimed: false
         });
     }
+
+    function cancel(uint256 _id) public {
+        Campaign memory campaign = campaigns[_id];
+        require(
+            campaign.creator == msg.sender,
+            "Only the creator can cancel the campaign"
+        );
+        require(
+            campaign.startAt > block.timestamp,
+            "Campaign cannot be canceled after it has started"
+        );
+
+        delete(campaigns[_id]);
+    }
+
+
+    
 }
