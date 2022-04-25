@@ -93,4 +93,27 @@ contract CrowdFund {
         pledgedAmount[_id][msg.sender] -= _amount;
         token.transfer(address(this), _amount);
     }
+
+    function claim(uint256 _id) public {
+        Campaign memory campaign = campaigns[_id];
+        require(
+            campaign.endAt > block.timestamp,
+            "Campaign cannot be claimed after it has ended"
+        );
+        require(campaign.claimed == false, "Campaign has already been claimed");
+        require(campaign.goal <= campaign.pledged, "Campaign goal not reached");
+        require(msg.sender == campaign.creator, "Only the creator can claim");
+
+        campaign.claimed = true;
+        token.transfer(campaign.creator, campaign.pledged);
+    }
+
+    function refund(uint256 _id) public {
+        Campaign memory campaign = campaigns[_id];
+        require(block.timestamp >= campaign.endAt, "Campaign has not ended");
+        require(campaign.pledged < campaign.goal, "Campaign has not reached goal");
+        uint256 bal = pledgedAmount[_id][msg.sender];
+        pledgedAmount[_id][msg.sender] = 0;
+        token.transfer(msg.sender, bal);
+    }
 }
